@@ -21,7 +21,7 @@ st.write("## Recommendation System")
 # Upload file/ Read file
 products = pd.read_csv("data/Product_new.csv")
 reviews = pd.read_csv("data/Review_new.csv")
-customer_id = reviews['customer_id'].drop_duplicates()
+
 
 # 2. Data pre-processing
 
@@ -310,7 +310,7 @@ elif choice == 'Collaborative filtering':
     st.write('''RMSE sau nhiều thử nghiệm đã có 1 kết quả tốt hơn. Chúng ta sẽ sử dụng kết quá này để dự báo cho toàn bộ user trong bộ dữ liệu.''')
     user_recs = pd.read_csv('data/user_recs.zip')
     # Select box 
-    
+    customer_id = user_recs['customer_id'].drop_duplicates()
     customer_id_choice = st.selectbox('Please choose a user to see the recommended items::', customer_id)
     recs = user_recs[user_recs['customer_id'] == customer_id_choice]
     st.markdown("<h4 style='text-align: left; color: #339966; '>Các sản phẩm đề nghị cho người dùng này</h4>", unsafe_allow_html=True)

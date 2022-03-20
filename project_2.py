@@ -21,6 +21,7 @@ st.write("## Recommendation System")
 # Upload file/ Read file
 products = pd.read_csv("data/Product_new.csv")
 reviews = pd.read_csv("data/Review_new.csv")
+customer_id = reviews['customer_id'].drop_duplicates()
 
 # 2. Data pre-processing
 
@@ -211,6 +212,15 @@ elif choice == "EDA" :
     )  
     
 elif choice == 'Content-based / Cosine Similarity':
+    def display_image(select_product):
+        col = st.columns(2)
+        with col[0]:
+            st.image(select_product['image'][0])
+        with col[1]:
+            formatted_string = "{:,.0f} VNĐ".format(select_product['list_price'][0])
+            st.write(select_product['name'][0])
+            st.write("Thương hiệu: ",select_product['brand'][0])
+            st.write("Giá: ",formatted_string)        
     st.subheader("Content based - Cosine Similarity")
     st.image("images/cosin.png")
     st.write("#### Cosine Similarity result")
@@ -224,12 +234,20 @@ elif choice == 'Content-based / Cosine Similarity':
     def format_func(option):
         return CHOICES[option]
     option = st.selectbox("Select product", options=list(CHOICES.keys()), format_func=format_func)
-    st.write(f"You selected option {option} : {format_func(option)}")
+    select_product = products[products['item_id'] == option].reset_index()
+    # Hiển thị select product
+    display_image(select_product)    
     # Results
     similar_products = cosine_similarity_data[cosine_similarity_data['product_id'] == option]
     similar_products['rcmd_product_name'] = similar_products.rcmd_product_id.map(CHOICES)
-    st.write("Similarity products:")
-    st.dataframe(similar_products)
+    similar_products = pd.merge(similar_products,products,left_on=['rcmd_product_id'], right_on = ['item_id'], how = 'left')
+
+
+    st.write("### Similarity products:")
+    # st.dataframe(similar_products)
+    for index, row in similar_products.iterrows():
+        row = row.to_frame().T.reset_index()
+        display_image(row)
 
 elif choice == 'Content-based / Gensim':
     # Reset index for product
@@ -279,4 +297,22 @@ elif choice == 'Content-based / Gensim':
 elif choice == 'Collaborative filtering':
     # Display
     st.subheader("Collaborative filtering")
-    st.image("images/collaborative.png")
+    # st.image("images/collaborative.png")
+    # ALS Model
+    st.write('''
+             #### ALS - Alternating Least Squares matrix factorization
+             - Chúng ta sẽ đưa ra các đề nghị sản phẩm cho tất cả User bằng model ALS.
+             ''')
+    st.image("images/ALS_1.png")
+    st.image("images/ALS_2.png")
+    st.write('''RMSE - Root Mean Square Error có 1 kết quả không mấy khả quan tại lần đầu train cho bộ dữ liệu.''')
+    st.image("images/ALS_3.png")
+    st.write('''RMSE sau nhiều thử nghiệm đã có 1 kết quả tốt hơn. Chúng ta sẽ sử dụng kết quá này để dự báo cho toàn bộ user trong bộ dữ liệu.''')
+    user_recs = pd.read_csv('data/user_recs.zip')
+    # Select box 
+    
+    customer_id_choice = st.selectbox('Please choose a user to see the recommended items::', customer_id)
+    recs = user_recs[user_recs['customer_id'] == customer_id_choice]
+    st.markdown("<h4 style='text-align: left; color: #339966; '>Các sản phẩm đề nghị cho người dùng này</h4>", unsafe_allow_html=True)
+    st.dataframe(recs['name'])
+

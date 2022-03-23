@@ -21,10 +21,6 @@ st.write("## Recommendation System")
 # Upload file/ Read file
 products = pd.read_csv("data/Product_new.csv")
 reviews = pd.read_csv("data/Review_new.csv")
-<<<<<<< Updated upstream
-
-
-=======
 # select box for product name
 product_name = products[['item_id','name']]
 CHOICES = dict(product_name.values)
@@ -39,7 +35,6 @@ def display_image(select_product):
             st.write(select_product['name'][0])
             st.write("Thương hiệu: ",select_product['brand'][0])
             st.write("Giá: ",formatted_string)         
->>>>>>> Stashed changes
 # 2. Data pre-processing
 
 

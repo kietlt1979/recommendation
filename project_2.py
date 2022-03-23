@@ -21,8 +21,25 @@ st.write("## Recommendation System")
 # Upload file/ Read file
 products = pd.read_csv("data/Product_new.csv")
 reviews = pd.read_csv("data/Review_new.csv")
+<<<<<<< Updated upstream
 
 
+=======
+# select box for product name
+product_name = products[['item_id','name']]
+CHOICES = dict(product_name.values)
+def format_func(option):
+        return CHOICES[option]
+def display_image(select_product):
+        col = st.columns(2)
+        with col[0]:
+            st.image(select_product['image'][0])
+        with col[1]:
+            formatted_string = "{:,.0f} VNĐ".format(select_product['price'][0])
+            st.write(select_product['name'][0])
+            st.write("Thương hiệu: ",select_product['brand'][0])
+            st.write("Giá: ",formatted_string)         
+>>>>>>> Stashed changes
 # 2. Data pre-processing
 
 
@@ -53,7 +70,7 @@ reviews = pd.read_csv("data/Review_new.csv")
 # GUI
 menu = ["Business Objective", "EDA", "Content-based / Cosine Similarity", "Content-based / Gensim", "Collaborative filtering"]
 
-choice = st.sidebar.selectbox('Menu', menu)
+choice = st.sidebar.radio('Select option', menu)
 if choice == "Business Objective" :
     st.subheader("Business Objective")
      
@@ -212,15 +229,7 @@ elif choice == "EDA" :
     )  
     
 elif choice == 'Content-based / Cosine Similarity':
-    def display_image(select_product):
-        col = st.columns(2)
-        with col[0]:
-            st.image(select_product['image'][0])
-        with col[1]:
-            formatted_string = "{:,.0f} VNĐ".format(select_product['list_price'][0])
-            st.write(select_product['name'][0])
-            st.write("Thương hiệu: ",select_product['brand'][0])
-            st.write("Giá: ",formatted_string)        
+              
     st.subheader("Content based - Cosine Similarity")
     st.image("images/cosin.png")
     st.write("#### Cosine Similarity result")
@@ -229,10 +238,8 @@ elif choice == 'Content-based / Cosine Similarity':
     st.dataframe(cosine_similarity_data.head())
     st.write("#### Predict base on product id:")
     # Select box
-    product_name = products[['item_id','name']]
-    CHOICES = dict(product_name.values)    
-    def format_func(option):
-        return CHOICES[option]
+   
+    
     option = st.selectbox("Select product", options=list(CHOICES.keys()), format_func=format_func)
     select_product = products[products['item_id'] == option].reset_index()
     # Hiển thị select product
@@ -285,14 +292,24 @@ elif choice == 'Content-based / Gensim':
     # Display
     st.subheader("Content based - Gensim")
     st.image("images/gensim.png")
-    st.write("#### Predict base on description")
-    text = st.text_input('Product description:', 'Tai nghe Bluetooth Inpods 12 - Cảm biến vân tay, chống nước,màu sắc đa dạng- 5 màu sắc lựa chọn')
+    st.write("#### Predict base on Gensim")
+    option = st.selectbox("Select product", options=list(CHOICES.keys()), format_func=format_func)
+    select_product = products[products['item_id'] == option].reset_index()
+    # Hiển thị select product
+    display_image(select_product)
+    text = select_product['name_description_pre'].to_string(index=False)
     # Gensim predict
     results = recommender(text, dictionary, tfidf, index)
-    results = results[['item_id', 'name', 'score']]    
+    results = results[['item_id', 'name', 'score']]
+    similar_products = pd.merge(results,products,left_on=['item_id'], right_on = ['item_id'], how = 'left')
+    similar_products.rename(columns = {'name_x':'name'}, inplace = True)    
     # # Results
-    st.write("Similarity products:")
-    st.dataframe(results)
+    st.write("#### Similarity products:")
+    # st.dataframe(similar_products)
+    # Display result
+    for index, row in similar_products.iterrows():
+        row = row.to_frame().T.reset_index()
+        display_image(row)
 
 elif choice == 'Collaborative filtering':
     # Display
